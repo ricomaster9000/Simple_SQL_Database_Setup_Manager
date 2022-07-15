@@ -225,7 +225,6 @@ abstract class BaseRepository<E extends BaseEntity> {
             throw new DbManagerException(DbManagerError.REPOSITORY_GET__ERROR, e.getMessage() + " non sql error", e);
         } finally {
             try {
-                DbUtils.rollback(getConnection());
                 DbUtils.close(getConnection());
             } catch (SQLException e) {
                 throw new DbManagerException(DbManagerError.REPOSITORY_GET__ERROR, e);
