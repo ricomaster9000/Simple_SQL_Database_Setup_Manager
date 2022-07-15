@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import static java.nio.file.Files.readString;
 
 public class DbManagerUtils {
-    private static final Properties properties = new Properties();
+    private static Properties properties;
 
     protected static String getConfigurationProperty(String keyName) {
         String result = getProperties().getProperty(keyName);
@@ -74,21 +74,29 @@ public class DbManagerUtils {
         return result;
     }
 
+    public static Properties loadPropertiesFile(Class<?> clazz) throws DbManagerException {
+        Properties result = new Properties();
+        try {
+            result.load(clazz.getClassLoader().getResourceAsStream("config.properties"));
+        } catch (IOException ignore) {}
+        if(result.isEmpty()) {
+            try {
+                result.load(clazz.getClassLoader().getResourceAsStream("application.properties"));
+            } catch (IOException ignore) {}
+        }
+        if(result.isEmpty()) {
+            throw new DbManagerException(DbManagerError.UNABLE_TO_GET_PROPERTIES_FILE);
+        }
+        return result;
+    }
+
     protected static Properties getProperties() {
-        if(properties.isEmpty()) {
-            try {
-                properties.load(DbManagerUtils.class.getClassLoader().getResourceAsStream("config.properties"));
-            } catch (IOException ignore) {}
-        }
-        if(properties.isEmpty()) {
-            try {
-                properties.load(DbManagerUtils.class.getClassLoader().getResourceAsStream("application.properties"));
-            } catch (IOException ignore) {}
-        }
         return properties;
     }
 
-    public static void runDbManager() throws DbManagerException {
+    public static void runDbManager(Properties properties) throws DbManagerException {
+        DbManagerUtils.properties = properties;
+
         DbManagerStatusDataRepository dbManagerStatusDataRepository = new DbManagerStatusDataRepository();
         DbManagerStatusData dbManagerStatusData = null;
 

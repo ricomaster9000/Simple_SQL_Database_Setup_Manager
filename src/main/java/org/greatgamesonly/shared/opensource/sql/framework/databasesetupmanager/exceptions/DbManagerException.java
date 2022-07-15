@@ -24,6 +24,11 @@ public class DbManagerException extends Exception {
         this.innerException = e;
     }
 
+    public DbManagerException(DbManagerError type) {
+        super(type.getReason());
+        this.type = type;
+    }
+
     public DbManagerError getErrorType() {
         return type;
     }

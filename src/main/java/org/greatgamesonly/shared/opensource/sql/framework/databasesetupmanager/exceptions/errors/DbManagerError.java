@@ -29,6 +29,8 @@ public class DbManagerError extends CustomError {
             500);
     public static final DbManagerError UNABLE_TO_FETCH_MIGRATION_FILES = new DbManagerError(DbManagerError.class.getName()+"_00109", "Error occurred while trying to read seed files",
             500);
+    public static final DbManagerError UNABLE_TO_GET_PROPERTIES_FILE = new DbManagerError(DbManagerError.class.getName()+"_00109", "Error occurred while trying to read seed files",
+            500);
 
     DbManagerError(String errorCode, String reason, int httpStatusCode) {
         super(errorCode,reason,httpStatusCode);
