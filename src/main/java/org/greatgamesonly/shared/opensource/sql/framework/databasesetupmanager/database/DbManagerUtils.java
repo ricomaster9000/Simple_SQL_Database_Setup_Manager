@@ -78,11 +78,11 @@ public class DbManagerUtils {
         Properties result = new Properties();
         try {
             result.load(clazz.getClassLoader().getResourceAsStream("config.properties"));
-        } catch (IOException ignore) {}
+        } catch (Exception ignore) {}
         if(result.isEmpty()) {
             try {
                 result.load(clazz.getClassLoader().getResourceAsStream("application.properties"));
-            } catch (IOException ignore) {}
+            } catch (Exception ignore) {}
         }
         if(result.isEmpty()) {
             throw new DbManagerException(DbManagerError.UNABLE_TO_GET_PROPERTIES_FILE);
