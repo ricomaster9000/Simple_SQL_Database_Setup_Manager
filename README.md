@@ -10,6 +10,6 @@ datasource.password
 
 For Java 11+
 
-add as dependency by using jitpack.io, go to this link: https://jitpack.io/#ricomaster9000/LightWeight_Java_PSQL_Framework/1.1.0
+add as dependency by using jitpack.io, go to this link: https://jitpack.io/#ricomaster9000/Simple_SQL_Database_Setup_Manager/1.0.0
 
 Will upload to Maven later, once I am fully done and have more time
