@@ -214,10 +214,14 @@ abstract class BaseRepository<E extends BaseEntity> {
     }
 
     protected ResultSet executeQueryRaw(String queryToRun) throws DbManagerException {
-        ResultSet entityList;
+        ResultSet entityList = null;
         try {
             CallableStatement callStatement = getConnection().prepareCall(queryToRun);
-            entityList = callStatement.executeQuery();
+            if(queryToRun.startsWith("SELECT")) {
+                entityList = callStatement.executeQuery();
+            } else {
+                callStatement.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
             throw new DbManagerException(DbManagerError.REPOSITORY_GET__ERROR,  String.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage()), e);
