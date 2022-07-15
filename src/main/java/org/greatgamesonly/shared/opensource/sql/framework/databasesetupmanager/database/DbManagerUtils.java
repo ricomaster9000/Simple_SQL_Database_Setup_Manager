@@ -103,7 +103,7 @@ public class DbManagerUtils {
             dbManagerStatusData = dbManagerStatusDataRepository.getAll().get(0);
         }
 
-        if(!dbManagerStatusData.getSeedFilesRan()) {
+        if(!dbManagerStatusData.getSeedFilesRan() && doesDirectoryOrFileExistInResourceDirectory(getSeedFileResourceDirectory())) {
             List<String> seedFileNames = new ArrayList<>();
             try {
                 seedFileNames = getResourceFiles(getSeedFileResourceDirectory());
@@ -130,33 +130,35 @@ public class DbManagerUtils {
             dbManagerStatusDataRepository.insertOrUpdate(dbManagerStatusData);
         }
 
-        List<String> migrationFileNames = new ArrayList<>();
-        try {
-            migrationFileNames = getResourceFiles(getMigrationFileResourceDirectory());
-        } catch (IOException e) {
-            throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES,e.getMessage());
-        }
-
-        try {
-            HashMap<Long, String> migrationNumbersOnlyAndFilenames = new HashMap<>();
-            migrationFileNames.forEach(migrationFileName -> migrationNumbersOnlyAndFilenames.put(Long.parseLong(migrationFileName.replaceAll("[^0-9]", "")), migrationFileName));
-            List<Long> migrationFilenameNumbersOnly = migrationNumbersOnlyAndFilenames.keySet().stream().sorted().collect(Collectors.toList());
-
-            if(dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun() != null && !dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun().isBlank()) {
-                migrationFilenameNumbersOnly =
-                    migrationFilenameNumbersOnly.subList(
-                        migrationFilenameNumbersOnly.indexOf(Long.parseLong(dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun().replaceAll("[^0-9]", ""))),
-                        migrationFilenameNumbersOnly.size()-1
-                    );
+        if(doesDirectoryOrFileExistInResourceDirectory(getMigrationFileResourceDirectory())) {
+            List<String> migrationFileNames = new ArrayList<>();
+            try {
+                migrationFileNames = getResourceFiles(getMigrationFileResourceDirectory());
+            } catch (IOException e) {
+                throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES, e.getMessage());
             }
-            for (Long migrationFilenameNumberOnly : migrationFilenameNumbersOnly) {
-                String sql = readString(getFileFromResource(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly)).toPath());
-                dbManagerStatusDataRepository.executeQueryRaw(sql);
-                dbManagerStatusData.setFilenameOfLastMigrationFileThatWasRun(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly));
-                dbManagerStatusDataRepository.insertOrUpdate(dbManagerStatusData);
+
+            try {
+                HashMap<Long, String> migrationNumbersOnlyAndFilenames = new HashMap<>();
+                migrationFileNames.forEach(migrationFileName -> migrationNumbersOnlyAndFilenames.put(Long.parseLong(migrationFileName.replaceAll("[^0-9]", "")), migrationFileName));
+                List<Long> migrationFilenameNumbersOnly = migrationNumbersOnlyAndFilenames.keySet().stream().sorted().collect(Collectors.toList());
+
+                if (dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun() != null && !dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun().isBlank()) {
+                    migrationFilenameNumbersOnly =
+                            migrationFilenameNumbersOnly.subList(
+                                    migrationFilenameNumbersOnly.indexOf(Long.parseLong(dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun().replaceAll("[^0-9]", ""))),
+                                    migrationFilenameNumbersOnly.size() - 1
+                            );
+                }
+                for (Long migrationFilenameNumberOnly : migrationFilenameNumbersOnly) {
+                    String sql = readString(getFileFromResource(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly)).toPath());
+                    dbManagerStatusDataRepository.executeQueryRaw(sql);
+                    dbManagerStatusData.setFilenameOfLastMigrationFileThatWasRun(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly));
+                    dbManagerStatusDataRepository.insertOrUpdate(dbManagerStatusData);
+                }
+            } catch (IOException | java.net.URISyntaxException e) {
+                throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES, e.getMessage());
             }
-        } catch (IOException | java.net.URISyntaxException e) {
-            throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES,e.getMessage());
         }
     }
 
@@ -190,6 +192,11 @@ public class DbManagerUtils {
 
     private static ClassLoader getContextClassLoader() {
         return Thread.currentThread().getContextClassLoader();
+    }
+
+    private static Boolean doesDirectoryOrFileExistInResourceDirectory(String resourceDir) {
+        final  URL resource = getContextClassLoader().getResource(resourceDir);
+        return (resource != null);
     }
 
 }
