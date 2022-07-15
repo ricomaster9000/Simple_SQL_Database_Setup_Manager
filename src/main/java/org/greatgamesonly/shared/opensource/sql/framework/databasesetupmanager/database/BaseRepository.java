@@ -19,16 +19,14 @@ import static org.greatgamesonly.shared.opensource.sql.framework.databasesetupma
 abstract class BaseRepository<E extends BaseEntity> {
 
     private static Connection connection;
-    private final Class<E> dbEntityClass;
+    private Class<E> dbEntityClass;
 
-    protected BaseRepository() {
-        if(!this.getClass().isAnnotationPresent(Repository.class)) {
-            throw new RuntimeException("Repository annotation must be set for repository class");
-        }
-        dbEntityClass = (Class<E>) this.getClass().getAnnotation(Repository.class).dbEntityClass();
-    }
+    protected BaseRepository() {}
 
     private Class<E> getDbEntityClass() {
+        if(dbEntityClass == null) {
+            dbEntityClass = (Class<E>) this.getClass().getAnnotation(Repository.class).dbEntityClass();
+        }
         return dbEntityClass;
     }
 
