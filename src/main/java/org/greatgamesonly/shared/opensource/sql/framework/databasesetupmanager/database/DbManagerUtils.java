@@ -101,7 +101,7 @@ public class DbManagerUtils {
         DbManagerStatusData dbManagerStatusData = null;
 
         dbManagerStatusDataRepository.executeQueryRaw("CREATE TABLE IF NOT EXISTS \"databasesetupmanager_setup_status_info\" ("+
-                "id serial PRIMARY_KEY,"+
+                "id serial PRIMARY KEY,"+
                 "seed_files_ran BOOLEAN NOT NULL DEFAULT FALSE,"+
                 "filename_last_migration_file_successfully_ran VARCHAR(10000) NOT NULL);");
 
