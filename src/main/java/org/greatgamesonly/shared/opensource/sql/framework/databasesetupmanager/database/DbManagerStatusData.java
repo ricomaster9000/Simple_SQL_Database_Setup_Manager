@@ -2,7 +2,7 @@ package org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.
 
 
 @Entity(tableName = "databasesetupmanager_setup_status_info", repositoryClass = DbManagerStatusDataRepository.class)
-class DbManagerStatusData extends BaseEntity {
+public class DbManagerStatusData extends BaseEntity {
     @PrimaryKey
     @ColumnName("id")
     protected Long id;
