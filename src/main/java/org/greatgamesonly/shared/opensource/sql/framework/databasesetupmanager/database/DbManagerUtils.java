@@ -91,7 +91,7 @@ public class DbManagerUtils {
     }
 
     protected static Properties getProperties() throws DbManagerException {
-        if(properties.isEmpty()) {
+        if(properties == null || properties.isEmpty()) {
             properties = loadPropertiesFile();
         }
         return properties;
