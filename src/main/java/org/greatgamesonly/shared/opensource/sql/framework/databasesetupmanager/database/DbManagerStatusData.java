@@ -13,6 +13,7 @@ public class DbManagerStatusData extends BaseEntity {
     public DbManagerStatusData() {}
 
     public DbManagerStatusData(Long id, Boolean seedFilesRan, String filenameOfLastMigrationFileThatWasRun) {
+        this.id = id;
         this.seedFilesRan = seedFilesRan;
         this.filenameOfLastMigrationFileThatWasRun = filenameOfLastMigrationFileThatWasRun;
     }

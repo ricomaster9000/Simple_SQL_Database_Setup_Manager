@@ -12,14 +12,6 @@ class DbEntityColumnToFieldToGetter {
     private String modifyDateAutoSetTimezone;
     private boolean canBeUpdatedInDb = true;
 
-    private boolean isForOneToManyRelation = false;
-
-    private boolean isForOneToOneRelation = false;
-
-    private boolean isForManyToOneRelation = false;
-
-    private boolean isForManyToOneReferenceId = false;
-
     private Class<? extends BaseEntity> linkedClassEntity = null;
 
     private String referenceFromColumnName;
@@ -31,6 +23,8 @@ class DbEntityColumnToFieldToGetter {
     private String linkedDbColumnName;
 
     private String additionalQueryToAdd;
+
+    private Class<?>[] methodParamTypes;
 
     public String getDbColumnName() {
         return dbColumnName;
@@ -109,14 +103,6 @@ class DbEntityColumnToFieldToGetter {
         this.canBeUpdatedInDb = canBeUpdatedInDb;
     }
 
-    public boolean isForOneToManyRelation() {
-        return isForOneToManyRelation;
-    }
-
-    public void setForOneToManyRelation(boolean forOneToManyRelation) {
-        isForOneToManyRelation = forOneToManyRelation;
-    }
-
     public Class<? extends BaseEntity> getLinkedClassEntity() {
         return linkedClassEntity;
     }
@@ -149,30 +135,6 @@ class DbEntityColumnToFieldToGetter {
         this.referenceToColumnClassFieldGetterMethodName = referenceToColumnClassFieldGetterMethodName;
     }
 
-    public boolean isForOneToOneRelation() {
-        return isForOneToOneRelation;
-    }
-
-    public void setForOneToOneRelation(boolean forOneToOneRelation) {
-        isForOneToOneRelation = forOneToOneRelation;
-    }
-
-    public boolean isForManyToOneRelation() {
-        return isForManyToOneRelation;
-    }
-
-    public void setForManyToOneRelation(boolean forManyToOneRelation) {
-        isForManyToOneRelation = forManyToOneRelation;
-    }
-
-    public boolean isForManyToOneReferenceId() {
-        return isForManyToOneReferenceId;
-    }
-
-    public void setForManyToOneReferenceId(boolean forManyToOneReferenceId) {
-        isForManyToOneReferenceId = forManyToOneReferenceId;
-    }
-
     public String getLinkedDbColumnName() {
         return linkedDbColumnName;
     }
@@ -187,5 +149,13 @@ class DbEntityColumnToFieldToGetter {
 
     public void setAdditionalQueryToAdd(String additionalQueryToAdd) {
         this.additionalQueryToAdd = additionalQueryToAdd;
+    }
+
+    public Class<?>[] getMethodParamTypes() {
+        return methodParamTypes;
+    }
+
+    public void setMethodParamTypes(Class<?>... methodParamTypes) {
+        this.methodParamTypes = methodParamTypes;
     }
 }

@@ -4,7 +4,6 @@ package org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.
 import java.beans.IntrospectionException;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 class DbUtils {
     protected static final Map<String, List<DbEntityColumnToFieldToGetter>> inMemoryDbEntityColumnToFieldToGetters = new HashMap<>();
@@ -33,6 +32,7 @@ class DbUtils {
             for (Field field : fields) {
                 DbEntityColumnToFieldToGetter dbEntityColumnToFieldToGetter = new DbEntityColumnToFieldToGetter();
                 dbEntityColumnToFieldToGetter.setClassFieldName(field.getName());
+                dbEntityColumnToFieldToGetter.setMethodParamTypes(field.getType());
 
                 if(field.isAnnotationPresent(ModifyDateAutoSet.class)) {
                     dbEntityColumnToFieldToGetter.setModifyDateAutoSet(true);
@@ -65,31 +65,6 @@ class DbUtils {
             }
         }
         return inMemoryDbEntityColumnToFieldToGetters.get(entityClass.getName());
-    }
-
-    protected static List<DbEntityColumnToFieldToGetter> getOneToManyRelationFieldToGetters(Class<?> entityClass) throws IntrospectionException {
-        return getDbEntityColumnToFieldToGetters(entityClass).stream()
-                .filter(DbEntityColumnToFieldToGetter::isForOneToManyRelation)
-                .collect(Collectors.toList());
-    }
-
-    protected static List<DbEntityColumnToFieldToGetter> getOneToOneRelationFieldToGetters(Class<?> entityClass) throws IntrospectionException {
-        return getDbEntityColumnToFieldToGetters(entityClass).stream()
-                .filter(DbEntityColumnToFieldToGetter::isForOneToOneRelation)
-                .collect(Collectors.toList());
-    }
-
-    protected static List<DbEntityColumnToFieldToGetter> getManyToOneRelationFieldToGetters(Class<?> entityClass) throws IntrospectionException {
-        return getDbEntityColumnToFieldToGetters(entityClass).stream()
-                .filter(DbEntityColumnToFieldToGetter::isForManyToOneRelation)
-                .collect(Collectors.toList());
-    }
-
-    protected static Map<String, String> getColumnsToFieldsMap(Class<?> entityClass) throws IntrospectionException {
-        return getDbEntityColumnToFieldToGetters(entityClass)
-                .stream()
-                .filter(columnToField -> !columnToField.isForOneToManyRelation())
-                .collect(Collectors.toMap(DbEntityColumnToFieldToGetter::getDbColumnName, DbEntityColumnToFieldToGetter::getClassFieldName));
     }
 
     protected static String returnPreparedValueForQuery(Object object) {

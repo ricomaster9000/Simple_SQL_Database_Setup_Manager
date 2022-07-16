@@ -115,7 +115,8 @@ abstract class BaseRepository<E extends BaseEntity> {
                         ReflectionUtilsImport.callReflectionMethod(
                                 finalExistingEntity,
                                 dbEntityColumnToFieldToGetter.getSetterMethodName(),
-                                ReflectionUtilsImport.callReflectionMethod(entity, dbEntityColumnToFieldToGetter.getGetterMethodName())
+                                new Object[]{ReflectionUtilsImport.callReflectionMethod(entity, dbEntityColumnToFieldToGetter.getGetterMethodName())},
+                                dbEntityColumnToFieldToGetter.getMethodParamTypes()
                         );
                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                         throw new DbManagerException(DbManagerError.REPOSITORY_CALL_REFLECTION_METHOD__ERROR, e);
@@ -146,9 +147,6 @@ abstract class BaseRepository<E extends BaseEntity> {
     private List<E> executeQuery(String queryToRun, QueryType queryType, Object... queryParameters) throws DbManagerException {
         List<E> entityList = new ArrayList<>();
         try {
-            List<DbEntityColumnToFieldToGetter> relationFieldToGetters = Stream.concat(getOneToManyRelationFieldToGetters(getDbEntityClass()).stream(), getOneToOneRelationFieldToGetters(getDbEntityClass()).stream()).collect(Collectors.toList());
-            relationFieldToGetters.addAll(getManyToOneRelationFieldToGetters(getDbEntityClass()));
-
             if(queryType.equals(QueryType.INSERT) || queryType.equals(QueryType.UPDATE)) {
                 if(queryType.equals(QueryType.INSERT)) {
                     entityList = getRunner().insert(getConnection(), queryToRun, getQueryResultHandler(), queryParameters);
@@ -159,41 +157,6 @@ abstract class BaseRepository<E extends BaseEntity> {
                 getRunner().execute(getConnection(), queryToRun, getQueryResultHandler());
             } else if(queryType.equals(QueryType.GET)) {
                 entityList = getRunner().query(getConnection(), queryToRun, getQueryResultHandler(), queryParameters);
-            }
-            if(queryType.equals(QueryType.GET)) {
-                if (!relationFieldToGetters.isEmpty()) {
-                    // Optimize relation get queries to be quicker - BEGIN
-                    HashMap<Long, E> entityHashMap = new HashMap<>();
-                    Long minId = 0L;
-                    Long maxId = 0L;
-                    for (E entity : entityList) {
-                        if (minId == null) {
-                            minId = entity.getId();
-                        }
-                        if (maxId == null) {
-                            maxId = entity.getId();
-                        }
-                        if (entity.getId() < minId) {
-                            minId = entity.getId();
-                        }
-                        if (entity.getId() > maxId) {
-                            maxId = entity.getId();
-                        }
-                        entityHashMap.put(entity.getId(), entity);
-                    }
-                    // Optimize relation get queries to be quicker - END
-                    for (DbEntityColumnToFieldToGetter dbEntityColumnToFieldToGetter : relationFieldToGetters) {
-                        if(dbEntityColumnToFieldToGetter.isForManyToOneRelation()) {
-                            continue; // Handled in the BaseBeanListHandler
-                        }
-                        BaseRepository<? extends BaseEntity> relationEntityRepo = dbEntityColumnToFieldToGetter.getLinkedClassEntity().getAnnotation(Entity.class).repositoryClass().getDeclaredConstructor().newInstance();
-                        List<? extends BaseEntity> oneToOneRelationEntities = relationEntityRepo.getAllByMinAndMaxAndColumnName(minId, maxId, dbEntityColumnToFieldToGetter.getReferenceToColumnName(), dbEntityColumnToFieldToGetter.getAdditionalQueryToAdd());
-                        for (BaseEntity relationEntity : oneToOneRelationEntities) {
-                            E entityToSetToManyRelationsOn = entityHashMap.get((Long) ReflectionUtilsImport.callReflectionMethod(relationEntity, dbEntityColumnToFieldToGetter.getReferenceToColumnClassFieldGetterMethodName()));
-                            ReflectionUtilsImport.callReflectionMethod(entityToSetToManyRelationsOn, dbEntityColumnToFieldToGetter.getSetterMethodName(), relationEntity);
-                        }
-                    }
-                }
             }
         } catch (SQLException e) {
             if(e.getSQLState().startsWith("23505")) {
@@ -252,10 +215,7 @@ abstract class BaseRepository<E extends BaseEntity> {
                 dbEntityColumnToFieldToGetters.stream()
                 .filter(dbEntityColumnToFieldToGetter ->
                         dbEntityColumnToFieldToGetter.hasSetter() &&
-                        !dbEntityColumnToFieldToGetter.isPrimaryKey() &&
-                        !dbEntityColumnToFieldToGetter.isForOneToManyRelation() &&
-                        !dbEntityColumnToFieldToGetter.isForManyToOneRelation() &&
-                        !dbEntityColumnToFieldToGetter.isForOneToOneRelation()
+                        !dbEntityColumnToFieldToGetter.isPrimaryKey()
                 )
                 .map(DbEntityColumnToFieldToGetter::getDbColumnName)
                 .collect(Collectors.joining(","))
@@ -309,10 +269,7 @@ abstract class BaseRepository<E extends BaseEntity> {
                 for(DbEntityColumnToFieldToGetter dbEntityColumnToFieldToGetter : dbEntityColumnToFieldToGetters) {
                     try {
                         if(dbEntityColumnToFieldToGetter.hasSetter() &&
-                            !dbEntityColumnToFieldToGetter.isPrimaryKey() &&
-                            !dbEntityColumnToFieldToGetter.isForOneToManyRelation() &&
-                            !dbEntityColumnToFieldToGetter.isForManyToOneRelation() &&
-                            !dbEntityColumnToFieldToGetter.isForOneToOneRelation()
+                            !dbEntityColumnToFieldToGetter.isPrimaryKey()
                         ) {
                             Object getterValue = ReflectionUtilsImport.callReflectionMethod(entityToUpdate, dbEntityColumnToFieldToGetter.getGetterMethodName());
                             if(getterValue == null && dbEntityColumnToFieldToGetter.isModifyDateAutoSet()) {
