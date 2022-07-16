@@ -69,10 +69,11 @@ abstract class BaseRepository<E extends BaseEntity> {
     protected Long countByColumn(String columnName, Object columnKey) throws DbManagerException {
         try {
             long countTotal;
-            ResultSet resultSet = executeQueryRaw("SELECT COUNT(*) FROM " +
+            ResultSet resultSet = executeQueryRaw("SELECT COUNT(*) AS total FROM " +
                     getDbEntityClass().getAnnotation(Entity.class).tableName() + " WHERE " + columnName + " = " +
-                    returnPreparedValueForQuery(columnKey));
-            countTotal = resultSet.getLong(0);
+                    returnPreparedValueForQuery(columnKey) + ";");
+            resultSet.next();
+            countTotal = resultSet.getLong("total");
             resultSet.close();
             return countTotal;
         } catch (SQLException e) {
@@ -83,11 +84,12 @@ abstract class BaseRepository<E extends BaseEntity> {
     protected Long countByColumns(String columnName, Object columnKey, String columnName2, Object columnKey2) throws DbManagerException {
         try {
             long countTotal;
-            ResultSet resultSet = executeQueryRaw("SELECT COUNT(*) FROM " +
+            ResultSet resultSet = executeQueryRaw("SELECT COUNT(*) AS total FROM " +
                     getDbEntityClass().getAnnotation(Entity.class).tableName() + " WHERE " + columnName + " = " +
                     returnPreparedValueForQuery(columnKey) +
-                    " AND " + columnName2 + " = " + returnPreparedValueForQuery(columnKey2));
-            countTotal = resultSet.getLong(0);
+                    " AND " + columnName2 + " = " + returnPreparedValueForQuery(columnKey2) + ";");
+            resultSet.next();
+            countTotal = resultSet.getLong("total");
             resultSet.close();
             return countTotal;
         } catch (SQLException e) {
