@@ -29,7 +29,7 @@ abstract class BaseRepository<E extends BaseEntity> {
         return dbEntityClass;
     }
 
-    protected abstract Map<String, String> getDbConnectionDetails();
+    protected abstract Map<String, String> getDbConnectionDetails() throws DbManagerException;
 
     protected E getById(Long id) throws DbManagerException {
         List<E> entitiesRetrieved = executeGetQuery("SELECT * FROM " + getDbEntityClass().getAnnotation(Entity.class).tableName() + " WHERE " + getPrimaryKeyDbColumnName(getDbEntityClass()) + " = " + id);
@@ -361,7 +361,7 @@ abstract class BaseRepository<E extends BaseEntity> {
         }
     }
 
-    protected Connection getConnection() throws SQLException {
+    protected Connection getConnection() throws SQLException, DbManagerException {
         if(connection == null || connection.isClosed()) {
             Map<String, String> dbConnectionDetails = getDbConnectionDetails();
 
