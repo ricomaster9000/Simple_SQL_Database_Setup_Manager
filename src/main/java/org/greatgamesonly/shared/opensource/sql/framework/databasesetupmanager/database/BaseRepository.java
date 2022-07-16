@@ -13,9 +13,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.greatgamesonly.reflection.utils.*;
-
-import static org.greatgamesonly.reflection.utils.CVI.ReflectionUtils.callReflectionMethod;
 import static org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.database.DbUtils.*;
 
 abstract class BaseRepository<E extends BaseEntity> {
@@ -115,10 +112,10 @@ abstract class BaseRepository<E extends BaseEntity> {
             for(DbEntityColumnToFieldToGetter dbEntityColumnToFieldToGetter : dbEntityColumnToFieldToGetters) {
                 if(dbEntityColumnToFieldToGetter.canBeUpdatedInDb() && !dbEntityColumnToFieldToGetter.isPrimaryKey()) {
                     try {
-                        callReflectionMethod(
+                        ReflectionUtilsImport.callReflectionMethod(
                                 finalExistingEntity,
                                 dbEntityColumnToFieldToGetter.getSetterMethodName(),
-                                callReflectionMethod(entity, dbEntityColumnToFieldToGetter.getGetterMethodName())
+                                ReflectionUtilsImport.callReflectionMethod(entity, dbEntityColumnToFieldToGetter.getGetterMethodName())
                         );
                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                         throw new DbManagerException(DbManagerError.REPOSITORY_CALL_REFLECTION_METHOD__ERROR, e);
@@ -192,8 +189,8 @@ abstract class BaseRepository<E extends BaseEntity> {
                         BaseRepository<? extends BaseEntity> relationEntityRepo = dbEntityColumnToFieldToGetter.getLinkedClassEntity().getAnnotation(Entity.class).repositoryClass().getDeclaredConstructor().newInstance();
                         List<? extends BaseEntity> oneToOneRelationEntities = relationEntityRepo.getAllByMinAndMaxAndColumnName(minId, maxId, dbEntityColumnToFieldToGetter.getReferenceToColumnName(), dbEntityColumnToFieldToGetter.getAdditionalQueryToAdd());
                         for (BaseEntity relationEntity : oneToOneRelationEntities) {
-                            E entityToSetToManyRelationsOn = entityHashMap.get((Long) callReflectionMethod(relationEntity, dbEntityColumnToFieldToGetter.getReferenceToColumnClassFieldGetterMethodName()));
-                            callReflectionMethod(entityToSetToManyRelationsOn, dbEntityColumnToFieldToGetter.getSetterMethodName(), relationEntity);
+                            E entityToSetToManyRelationsOn = entityHashMap.get((Long) ReflectionUtilsImport.callReflectionMethod(relationEntity, dbEntityColumnToFieldToGetter.getReferenceToColumnClassFieldGetterMethodName()));
+                            ReflectionUtilsImport.callReflectionMethod(entityToSetToManyRelationsOn, dbEntityColumnToFieldToGetter.getSetterMethodName(), relationEntity);
                         }
                     }
                 }
@@ -271,7 +268,7 @@ abstract class BaseRepository<E extends BaseEntity> {
                 for(DbEntityColumnToFieldToGetter dbEntityColumnToFieldToGetter : dbEntityColumnToFieldToGetters) {
                     try {
                         if(dbEntityColumnToFieldToGetter.hasSetter() && !dbEntityColumnToFieldToGetter.isPrimaryKey()) {
-                            Object getterValue = callReflectionMethod(entityToInsert, dbEntityColumnToFieldToGetter.getGetterMethodName());
+                            Object getterValue = ReflectionUtilsImport.callReflectionMethod(entityToInsert, dbEntityColumnToFieldToGetter.getGetterMethodName());
                             toAppendValues.add((getterValue != null) ? returnPreparedValueForQuery(getterValue) : null);
                         }
                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -317,7 +314,7 @@ abstract class BaseRepository<E extends BaseEntity> {
                             !dbEntityColumnToFieldToGetter.isForManyToOneRelation() &&
                             !dbEntityColumnToFieldToGetter.isForOneToOneRelation()
                         ) {
-                            Object getterValue = callReflectionMethod(entityToUpdate, dbEntityColumnToFieldToGetter.getGetterMethodName());
+                            Object getterValue = ReflectionUtilsImport.callReflectionMethod(entityToUpdate, dbEntityColumnToFieldToGetter.getGetterMethodName());
                             if(getterValue == null && dbEntityColumnToFieldToGetter.isModifyDateAutoSet()) {
                                 getterValue = nowDbTimestamp(dbEntityColumnToFieldToGetter.getModifyDateAutoSetTimezone());
                             }

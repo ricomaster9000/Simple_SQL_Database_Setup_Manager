@@ -6,8 +6,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.greatgamesonly.reflection.utils.CVI.ReflectionUtils.*;
-
 class DbUtils {
     protected static final Map<String, List<DbEntityColumnToFieldToGetter>> inMemoryDbEntityColumnToFieldToGetters = new HashMap<>();
 
@@ -22,14 +20,14 @@ class DbUtils {
                     entityClass.getSuperclass().getSuperclass().equals(BaseEntity.class));
 
             inMemoryDbEntityColumnToFieldToGetters.put(entityClass.getName(), new ArrayList<>());
-            Field[] fields = getClassFields(entityClass, false, List.of(DBIgnore.class));
-            Set<String> getters = getGetters(entityClass);
-            Set<String> setters = getSetters(entityClass);
+            Field[] fields = ReflectionUtilsImport.getClassFields(entityClass, false, List.of(DBIgnore.class));
+            Set<String> getters = ReflectionUtilsImport.getGetters(entityClass);
+            Set<String> setters = ReflectionUtilsImport.getSetters(entityClass);
 
             if(getSuperClassGettersAndSettersAlso) {
-                fields = concatenate(fields, getClassFields(entityClass.getSuperclass(),false,List.of(DBIgnore.class)));
-                getters.addAll(getGetters(entityClass.getSuperclass()));
-                setters.addAll(getSetters(entityClass.getSuperclass()));
+                fields = ReflectionUtilsImport.concatenate(fields, ReflectionUtilsImport.getClassFields(entityClass.getSuperclass(),false,List.of(DBIgnore.class)));
+                getters.addAll(ReflectionUtilsImport.getGetters(entityClass.getSuperclass()));
+                setters.addAll(ReflectionUtilsImport.getSetters(entityClass.getSuperclass()));
             }
 
             for (Field field : fields) {
@@ -50,13 +48,13 @@ class DbUtils {
                     throw new IntrospectionException("annotation not set for db entity field, please set in code");
                 }
 
-                if(setters.contains("set" + capitalizeString(dbEntityColumnToFieldToGetter.getClassFieldName()))) {
+                if(setters.contains("set" + ReflectionUtilsImport.capitalizeString(dbEntityColumnToFieldToGetter.getClassFieldName()))) {
                     dbEntityColumnToFieldToGetter.setHasSetter(true);
-                    dbEntityColumnToFieldToGetter.setSetterMethodName("set" + capitalizeString(dbEntityColumnToFieldToGetter.getClassFieldName()));
+                    dbEntityColumnToFieldToGetter.setSetterMethodName("set" + ReflectionUtilsImport.capitalizeString(dbEntityColumnToFieldToGetter.getClassFieldName()));
                 }
                 dbEntityColumnToFieldToGetter.setGetterMethodName(
                     getters.stream()
-                        .filter(getter -> getter.equals("get" + capitalizeString(dbEntityColumnToFieldToGetter.getClassFieldName())))
+                        .filter(getter -> getter.equals("get" + ReflectionUtilsImport.capitalizeString(dbEntityColumnToFieldToGetter.getClassFieldName())))
                         .findFirst().orElse(null)
                 );
                 if(field.isAnnotationPresent(PrimaryKey.class)) {
