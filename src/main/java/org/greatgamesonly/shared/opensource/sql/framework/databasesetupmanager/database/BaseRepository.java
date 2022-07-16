@@ -13,7 +13,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.greatgamesonly.reflection.utils.ReflectionUtils.callReflectionMethod;
+import org.greatgamesonly.reflection.utils.*;
+
+import static org.greatgamesonly.reflection.utils.CVI.ReflectionUtils.callReflectionMethod;
 import static org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.database.DbUtils.*;
 
 abstract class BaseRepository<E extends BaseEntity> {
