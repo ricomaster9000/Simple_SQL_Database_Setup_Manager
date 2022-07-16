@@ -4,6 +4,7 @@ package org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.
 import java.beans.IntrospectionException;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class DbUtils {
     protected static final Map<String, List<DbEntityColumnToFieldToGetter>> inMemoryDbEntityColumnToFieldToGetters = new HashMap<>();
@@ -65,6 +66,12 @@ class DbUtils {
             }
         }
         return inMemoryDbEntityColumnToFieldToGetters.get(entityClass.getName());
+    }
+
+    protected static Map<String, String> getColumnsToFieldsMap(Class<?> entityClass) throws IntrospectionException {
+        return getDbEntityColumnToFieldToGetters(entityClass)
+                .stream()
+                .collect(Collectors.toMap(DbEntityColumnToFieldToGetter::getDbColumnName, DbEntityColumnToFieldToGetter::getClassFieldName));
     }
 
     protected static String returnPreparedValueForQuery(Object object) {
