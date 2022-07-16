@@ -187,7 +187,7 @@ public class DbManagerUtils {
             BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
             String resource;
             while ((resource = br.readLine()) != null) {
-                filenames.add(resource);
+                filenames.add((path.endsWith("/")) ? path + resource : path + "/" + resource);
             }
         }
         return filenames;
