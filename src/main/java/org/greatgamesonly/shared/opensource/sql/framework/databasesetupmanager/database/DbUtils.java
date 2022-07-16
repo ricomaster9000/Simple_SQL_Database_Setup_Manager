@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.greatgamesonly.reflection.utils.ReflectionUtils.*;
+import static org.greatgamesonly.reflection.utils.CVI.ReflectionUtils.*;
 
 class DbUtils {
     protected static final Map<String, List<DbEntityColumnToFieldToGetter>> inMemoryDbEntityColumnToFieldToGetters = new HashMap<>();
