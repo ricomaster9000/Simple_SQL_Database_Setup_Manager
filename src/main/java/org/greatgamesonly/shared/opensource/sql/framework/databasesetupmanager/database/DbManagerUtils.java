@@ -116,10 +116,6 @@ public class DbManagerUtils {
             List<String> seedFileNames = new ArrayList<>();
             try {
                 seedFileNames = getResourceFiles(getSeedFileResourceDirectory());
-                    /*Files.walk(Paths.get("/path/to/folder"))
-                    .filter(Files::isRegularFile)
-                    .map(Path::toFile)
-                    .collect(Collectors.toList());*/
             } catch (IOException e) {
                 throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
             }
