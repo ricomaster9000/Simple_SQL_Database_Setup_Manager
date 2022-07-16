@@ -17,7 +17,7 @@ import static java.nio.file.Files.readString;
 public class DbManagerUtils {
     private static Properties properties;
 
-    protected static String getConfigurationProperty(String keyName) {
+    protected static String getConfigurationProperty(String keyName) throws DbManagerException {
         String result = getProperties().getProperty(keyName);
         if(result == null || result.isBlank()) {
             result = System.getenv(keyName);
@@ -25,7 +25,7 @@ public class DbManagerUtils {
         return result;
     }
 
-    protected static String getDatabaseUrl() {
+    protected static String getDatabaseUrl() throws DbManagerException {
         String result = getConfigurationProperty("datasource.url");
         if(result == null || result.isBlank()) {
             result = getConfigurationProperty("quarkus.datasource.url");
@@ -36,7 +36,7 @@ public class DbManagerUtils {
         return result;
     }
 
-    protected static String getDatabaseUsername() {
+    protected static String getDatabaseUsername() throws DbManagerException {
         String result = getConfigurationProperty("datasource.username");
         if(result == null || result.isBlank()) {
             result = getConfigurationProperty("quarkus.datasource.username");
@@ -47,7 +47,7 @@ public class DbManagerUtils {
         return result;
     }
 
-    protected static String getDatabasePassword() {
+    protected static String getDatabasePassword() throws DbManagerException {
         String result = getConfigurationProperty("datasource.password");
         if(result == null || result.isBlank()) {
             result = getConfigurationProperty("quarkus.datasource.password");
@@ -58,7 +58,7 @@ public class DbManagerUtils {
         return result;
     }
 
-    protected static String getSeedFileResourceDirectory() {
+    protected static String getSeedFileResourceDirectory() throws DbManagerException {
         String result = getConfigurationProperty("databasesetupmanager_db_seed_files_directory");
         if(result == null || result.isBlank()) {
             result = "seeds";
@@ -66,7 +66,7 @@ public class DbManagerUtils {
         return result;
     }
 
-    protected static String getMigrationFileResourceDirectory() {
+    protected static String getMigrationFileResourceDirectory() throws DbManagerException {
         String result = getConfigurationProperty("databasesetupmanager_db_migration_files_directory");
         if(result == null || result.isBlank()) {
             result = "migrations";
@@ -74,14 +74,14 @@ public class DbManagerUtils {
         return result;
     }
 
-    public static Properties loadPropertiesFile(Class<?> clazz) throws DbManagerException {
+    public static Properties loadPropertiesFile() throws DbManagerException {
         Properties result = new Properties();
         try {
-            result.load(clazz.getClassLoader().getResourceAsStream("config.properties"));
+            result.load(getContextClassLoader().getResourceAsStream("config.properties"));
         } catch (Exception ignore) {}
         if(result.isEmpty()) {
             try {
-                result.load(clazz.getClassLoader().getResourceAsStream("application.properties"));
+                result.load(getContextClassLoader().getResourceAsStream("application.properties"));
             } catch (Exception ignore) {}
         }
         if(result.isEmpty()) {
@@ -90,13 +90,14 @@ public class DbManagerUtils {
         return result;
     }
 
-    protected static Properties getProperties() {
+    protected static Properties getProperties() throws DbManagerException {
+        if(properties.isEmpty()) {
+            properties = loadPropertiesFile();
+        }
         return properties;
     }
 
-    public static void runDbManager(Properties properties) throws DbManagerException {
-        DbManagerUtils.properties = properties;
-
+    public static void runDbManager() throws DbManagerException {
         DbManagerStatusDataRepository dbManagerStatusDataRepository = new DbManagerStatusDataRepository();
         DbManagerStatusData dbManagerStatusData = null;
 
@@ -171,7 +172,7 @@ public class DbManagerUtils {
     }
 
     private static File getFileFromResource(String fileName) throws URISyntaxException {
-        ClassLoader classLoader = DbManagerUtils.class.getClassLoader();
+        ClassLoader classLoader = getContextClassLoader();
         URL resource = classLoader.getResource(fileName);
         if (resource == null) {
             throw new IllegalArgumentException("file not found! " + fileName);
@@ -195,7 +196,7 @@ public class DbManagerUtils {
 
     private static InputStream getResourceAsStream(String resource) {
         final InputStream in = getContextClassLoader().getResourceAsStream(resource);
-        return in == null ? DbManagerUtils.class.getResourceAsStream(resource) : in;
+        return in == null ? getContextClassLoader().getResourceAsStream(resource) : in;
     }
 
     private static ClassLoader getContextClassLoader() {
