@@ -21,13 +21,13 @@ class DbUtils {
 
             inMemoryDbEntityColumnToFieldToGetters.put(entityClass.getName(), new ArrayList<>());
             Field[] fields = ReflectionUtilsImport.getClassFields(entityClass, false, List.of(DBIgnore.class));
-            Set<String> getters = ReflectionUtilsImport.getGetters(entityClass);
-            Set<String> setters = ReflectionUtilsImport.getSetters(entityClass);
+            Set<String> getters = ReflectionUtilsImport.getGettersForBaseValueTypes(entityClass.getSuperclass(), true, true);
+            Set<String> setters = ReflectionUtilsImport.getSettersForBaseValueTypes(entityClass.getSuperclass(), true, true);
 
             if(getSuperClassGettersAndSettersAlso) {
                 fields = ReflectionUtilsImport.concatenate(fields, ReflectionUtilsImport.getClassFields(entityClass.getSuperclass(),false,List.of(DBIgnore.class)));
-                getters.addAll(ReflectionUtilsImport.getGetters(entityClass.getSuperclass()));
-                setters.addAll(ReflectionUtilsImport.getSetters(entityClass.getSuperclass()));
+                getters.addAll(ReflectionUtilsImport.getGettersForBaseValueTypes(entityClass.getSuperclass(), true, true));
+                setters.addAll(ReflectionUtilsImport.getSettersForBaseValueTypes(entityClass.getSuperclass(), true, true));
             }
 
             for (Field field : fields) {
