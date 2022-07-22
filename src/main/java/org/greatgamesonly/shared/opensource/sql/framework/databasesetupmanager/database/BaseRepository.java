@@ -2,6 +2,7 @@ package org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.
 
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
+import org.greatgamesonly.reflection.utils.ReflectionUtils;
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.DbManagerException;
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.errors.DbManagerError;
 
@@ -114,10 +115,10 @@ abstract class BaseRepository<E extends BaseEntity> {
             for(DbEntityColumnToFieldToGetter dbEntityColumnToFieldToGetter : dbEntityColumnToFieldToGetters) {
                 if(dbEntityColumnToFieldToGetter.canBeUpdatedInDb() && !dbEntityColumnToFieldToGetter.isPrimaryKey()) {
                     try {
-                        ReflectionUtilsImport.callReflectionMethod(
+                        ReflectionUtils.callReflectionMethod(
                                 finalExistingEntity,
                                 dbEntityColumnToFieldToGetter.getSetterMethodName(),
-                                new Object[]{ReflectionUtilsImport.callReflectionMethod(entity, dbEntityColumnToFieldToGetter.getGetterMethodName())},
+                                new Object[]{ReflectionUtils.callReflectionMethod(entity, dbEntityColumnToFieldToGetter.getGetterMethodName())},
                                 dbEntityColumnToFieldToGetter.getMethodParamTypes()
                         );
                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -230,7 +231,7 @@ abstract class BaseRepository<E extends BaseEntity> {
                 for(DbEntityColumnToFieldToGetter dbEntityColumnToFieldToGetter : dbEntityColumnToFieldToGetters) {
                     try {
                         if(dbEntityColumnToFieldToGetter.hasSetter() && !dbEntityColumnToFieldToGetter.isPrimaryKey()) {
-                            Object getterValue = ReflectionUtilsImport.callReflectionMethod(entityToInsert, dbEntityColumnToFieldToGetter.getGetterMethodName());
+                            Object getterValue = ReflectionUtils.callReflectionMethod(entityToInsert, dbEntityColumnToFieldToGetter.getGetterMethodName());
                             toAppendValues.add((getterValue != null) ? returnPreparedValueForQuery(getterValue) : null);
                         }
                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -273,7 +274,7 @@ abstract class BaseRepository<E extends BaseEntity> {
                         if(dbEntityColumnToFieldToGetter.hasSetter() &&
                             !dbEntityColumnToFieldToGetter.isPrimaryKey()
                         ) {
-                            Object getterValue = ReflectionUtilsImport.callReflectionMethod(entityToUpdate, dbEntityColumnToFieldToGetter.getGetterMethodName());
+                            Object getterValue = ReflectionUtils.callReflectionMethod(entityToUpdate, dbEntityColumnToFieldToGetter.getGetterMethodName());
                             if(getterValue == null && dbEntityColumnToFieldToGetter.isModifyDateAutoSet()) {
                                 getterValue = nowDbTimestamp(dbEntityColumnToFieldToGetter.getModifyDateAutoSetTimezone());
                             }
