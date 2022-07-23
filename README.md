@@ -16,6 +16,6 @@ for migrations it takes note of the last migration file ran, and any new migrati
 
 THERE is currently no solid rollback functionality that exists if seed or migration operations fail, so take note of this, will add in later versions.
 
-add as dependency by using jitpack.io, go to this link: https://jitpack.io/#ricomaster9000/Simple_SQL_Database_Setup_Manager/1.0.7
+add as dependency by using jitpack.io, go to this link: https://jitpack.io/#ricomaster9000/Simple_SQL_Database_Setup_Manager/1.0.7.1
 
 Will upload to Maven later, once I am fully done and have more time
