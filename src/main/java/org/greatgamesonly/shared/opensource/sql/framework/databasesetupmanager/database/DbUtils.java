@@ -23,8 +23,8 @@ class DbUtils {
 
             inMemoryDbEntityColumnToFieldToGetters.put(entityClass.getName(), new ArrayList<>());
             Field[] fields = ReflectionUtils.getClassFields(entityClass, false, List.of(DBIgnore.class));
-            Set<String> getters = ReflectionUtils.getGettersForBaseValueTypes(entityClass.getSuperclass(), true, true);
-            Set<String> setters = ReflectionUtils.getSettersForBaseValueTypes(entityClass.getSuperclass(), true, true);
+            Set<String> getters = ReflectionUtils.getGettersForBaseValueTypes(entityClass, true, true);
+            Set<String> setters = ReflectionUtils.getSettersForBaseValueTypes(entityClass, true, true);
 
             if(getSuperClassGettersAndSettersAlso) {
                 fields = ReflectionUtils.concatenate(fields, ReflectionUtils.getClassFields(entityClass.getSuperclass(),false,List.of(DBIgnore.class)));
