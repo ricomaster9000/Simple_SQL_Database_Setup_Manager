@@ -14,7 +14,7 @@ This will firstly run seeds, after seeds are run, seeds will never be run again,
 
 for migrations it takes note of the last migration file ran, and any new migration files added that is higher than the numerical sorting value of the last migration file that was run will then be run, when migrations run again then the last migration file(the filename specificially) ran will be used for the next time to determine what migration files to run, and on it goes...
 
-THERE IS NO rollback functionality that exists if migration operations fail, so take note of this, will add in later versions.
+THERE IS NO rollback functionality that exists if migration operations fail, so take note of this, will add in later versions, BUT for every migration file successfully ran it overrides the last migration filename field and will never run it again even if all the migration files could not be processed
 
 THERE IS rollback functionality that exists if seed files fail to process, but take note that this rollback logic is quite basic and will remove all the tables and functions and constraints etc. in the public schema for the database name used in the datasource.url property value.
 
