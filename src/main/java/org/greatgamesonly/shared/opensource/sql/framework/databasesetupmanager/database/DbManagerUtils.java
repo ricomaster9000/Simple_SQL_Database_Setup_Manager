@@ -138,10 +138,9 @@ public class DbManagerUtils {
 
                 //ROLLBACK by deleting all the tables in a schema (including constraints and functions etc.
                 dbManagerStatusDataRepository.executeQueryRaw(
-                    String.format("DROP SCHEMA %s CASCADE; CREATE SCHEMA %s; GRANT ALL ON SCHEMA %s TO postgres; GRANT ALL ON SCHEMA %s TO %s;",
-                        databaseName, databaseName, databaseName, databaseName, getDatabaseUsername()
-                    )
+                    String.format("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO %s;",getDatabaseUsername())
                 );
+                throw new DbManagerException(DbManagerError.UNABLE_TO_PROCESS_SEED_FILES);
             }
         }
 
