@@ -14,7 +14,9 @@ This will firstly run seeds, after seeds are run, seeds will never be run again,
 
 for migrations it takes note of the last migration file ran, and any new migration files added that is higher than the numerical sorting value of the last migration file that was run will then be run, then then again the last migration file(the filename specificially) run will be used the next time to determine what migration files to run
 
-THERE is currently no solid rollback functionality that exists if seed or migration operations fail, so take note of this, will add in later versions.
+THERE IS NO rollback functionality that exists if migration operations fail, so take note of this, will add in later versions.
+
+THERE IS rollback functionality that exists if seed files fail to process, but take note that this rollback logic is quite basic and will remove all the tables and functions and constraints etc. in the public schema for the database name used in the datasource.url property value.
 
 add as dependency by using jitpack.io, go to this link: https://jitpack.io/#ricomaster9000/Simple_SQL_Database_Setup_Manager/1.1.0
 
