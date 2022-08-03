@@ -4,12 +4,10 @@ import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.e
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.errors.DbManagerError;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.nio.file.Files.readString;
@@ -113,26 +111,38 @@ public class DbManagerUtils {
         }
 
         if(!dbManagerStatusData.getSeedFilesRan() && doesDirectoryOrFileExistInResourceDirectory(getSeedFileResourceDirectory())) {
-            List<String> seedFileNames = new ArrayList<>();
             try {
-                seedFileNames = getResourceFiles(getSeedFileResourceDirectory());
-            } catch (IOException e) {
-                throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
-            }
-
-            try {
-                HashMap<Long, String> seedNumbersOnlyAndFilenames = new HashMap<>();
-                seedFileNames.forEach(seedFileName -> seedNumbersOnlyAndFilenames.put(Long.parseLong(seedFileName.replaceAll("[^0-9]", "")), seedFileName));
-                List<Long> seedFilenameNumbersOnly = seedNumbersOnlyAndFilenames.keySet().stream().sorted().collect(Collectors.toList());
-                for (Long seedFilenameNumberOnly : seedFilenameNumbersOnly) {
-                    String sql = readString(getFileFromResource(seedNumbersOnlyAndFilenames.get(seedFilenameNumberOnly)).toPath());
-                    dbManagerStatusDataRepository.executeQueryRaw(sql);
+                List<String> seedFileNames = new ArrayList<>();
+                try {
+                    seedFileNames = getResourceFiles(getSeedFileResourceDirectory());
+                } catch (IOException e) {
+                    throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
                 }
-            } catch (IOException | java.net.URISyntaxException e) {
-                throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
+
+                try {
+                    HashMap<Long, String> seedNumbersOnlyAndFilenames = new HashMap<>();
+                    seedFileNames.forEach(seedFileName -> seedNumbersOnlyAndFilenames.put(Long.parseLong(seedFileName.replaceAll("[^0-9]", "")), seedFileName));
+                    List<Long> seedFilenameNumbersOnly = seedNumbersOnlyAndFilenames.keySet().stream().sorted().collect(Collectors.toList());
+                    for (Long seedFilenameNumberOnly : seedFilenameNumbersOnly) {
+                        String sql = readString(getFileFromResource(seedNumbersOnlyAndFilenames.get(seedFilenameNumberOnly)).toPath());
+                        dbManagerStatusDataRepository.executeQueryRaw(sql);
+                    }
+                } catch (IOException | java.net.URISyntaxException e) {
+                    throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
+                }
+                dbManagerStatusData.setSeedFilesRan(true);
+                dbManagerStatusDataRepository.insertOrUpdate(dbManagerStatusData);
+            } catch (Exception e) {
+                String[] databaseUrl = getDatabaseUrl().split("/");
+                String databaseName = databaseUrl[databaseUrl.length-1];
+
+                //ROLLBACK by deleting all the tables in a schema (including constraints and functions etc.
+                dbManagerStatusDataRepository.executeQueryRaw(
+                    String.format("DROP SCHEMA %s CASCADE; CREATE SCHEMA %s; GRANT ALL ON SCHEMA %s TO postgres; GRANT ALL ON SCHEMA %s TO %s;",
+                        databaseName, databaseName, databaseName, databaseName, getDatabaseUsername()
+                    )
+                );
             }
-            dbManagerStatusData.setSeedFilesRan(true);
-            dbManagerStatusDataRepository.insertOrUpdate(dbManagerStatusData);
         }
 
         if(doesDirectoryOrFileExistInResourceDirectory(getMigrationFileResourceDirectory())) {
@@ -151,8 +161,8 @@ public class DbManagerUtils {
                 if (dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun() != null && !dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun().isBlank()) {
                     migrationFilenameNumbersOnly =
                             migrationFilenameNumbersOnly.subList(
-                                    migrationFilenameNumbersOnly.indexOf(Long.parseLong(dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun().replaceAll("[^0-9]", ""))),
-                                    migrationFilenameNumbersOnly.size() - 1
+                                migrationFilenameNumbersOnly.indexOf(Long.parseLong(dbManagerStatusData.getFilenameOfLastMigrationFileThatWasRun().replaceAll("[^0-9]", ""))),
+                                migrationFilenameNumbersOnly.size() - 1
                             );
                 }
                 for (Long migrationFilenameNumberOnly : migrationFilenameNumbersOnly) {
