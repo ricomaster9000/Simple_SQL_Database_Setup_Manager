@@ -3,61 +3,60 @@ package org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.DbManagerException;
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.errors.DbManagerError;
 
-import java.io.*;
-import java.lang.reflect.Array;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.nio.file.Files.readString;
+import static org.greatgamesonly.opensource.utils.resourceutils.ResourceUtils.*;
 
 public class DbManagerUtils {
-    private static Properties properties;
-
-    protected static String getConfigurationProperty(String keyName) throws DbManagerException {
-        String result = getProperties().getProperty(keyName);
-        if(result == null || result.isBlank()) {
-            result = System.getenv(keyName);
-        }
-        return result;
-    }
 
     protected static String getDatabaseUrl() throws DbManagerException {
-        String result = getConfigurationProperty("datasource.url");
+        String result = getProperty("datasource.url");
         if(result == null || result.isBlank()) {
-            result = getConfigurationProperty("quarkus.datasource.url");
+            result = getProperty("quarkus.datasource.url");
         }
         if(result == null || result.isBlank()) {
-            result = getConfigurationProperty("DATABASE_URL");
+            result = getProperty("DATABASE_URL");
+        }
+        if(result == null || result.isBlank()) {
+            throw new DbManagerException(DbManagerError.UNABLE_TO_GET_DATABASE_CONNECTION_DETAILS);
         }
         return result;
     }
 
     protected static String getDatabaseUsername() throws DbManagerException {
-        String result = getConfigurationProperty("datasource.username");
+        String result = getProperty("datasource.username");
         if(result == null || result.isBlank()) {
-            result = getConfigurationProperty("quarkus.datasource.username");
+            result = getProperty("quarkus.datasource.username");
         }
         if(result == null || result.isBlank()) {
-            result = getConfigurationProperty("DATABASE_USERNAME");
+            result = getProperty("DATABASE_USERNAME");
+        }
+        if(result == null || result.isBlank()) {
+            throw new DbManagerException(DbManagerError.UNABLE_TO_GET_DATABASE_CONNECTION_DETAILS);
         }
         return result;
     }
 
     protected static String getDatabasePassword() throws DbManagerException {
-        String result = getConfigurationProperty("datasource.password");
+        String result = getProperty("datasource.password");
         if(result == null || result.isBlank()) {
-            result = getConfigurationProperty("quarkus.datasource.password");
+            result = getProperty("quarkus.datasource.password");
         }
         if(result == null || result.isBlank()) {
-            result = getConfigurationProperty("DATABASE_PASSWORD");
+            result = getProperty("DATABASE_PASSWORD");
+        }
+        if(result == null || result.isBlank()) {
+            throw new DbManagerException(DbManagerError.UNABLE_TO_GET_DATABASE_CONNECTION_DETAILS);
         }
         return result;
     }
 
     protected static String getSeedFileResourceDirectory() throws DbManagerException {
-        String result = getConfigurationProperty("databasesetupmanager_db_seed_files_directory");
+        String result = getProperty("databasesetupmanager_db_seed_files_directory");
         if(result == null || result.isBlank()) {
             result = "seeds";
         }
@@ -65,34 +64,11 @@ public class DbManagerUtils {
     }
 
     protected static String getMigrationFileResourceDirectory() throws DbManagerException {
-        String result = getConfigurationProperty("databasesetupmanager_db_migration_files_directory");
+        String result = getProperty("databasesetupmanager_db_migration_files_directory");
         if(result == null || result.isBlank()) {
             result = "migrations";
         }
         return result;
-    }
-
-    public static Properties loadPropertiesFile() throws DbManagerException {
-        Properties result = new Properties();
-        try {
-            result.load(getContextClassLoader().getResourceAsStream("config.properties"));
-        } catch (Exception ignore) {}
-        if(result.isEmpty()) {
-            try {
-                result.load(getContextClassLoader().getResourceAsStream("application.properties"));
-            } catch (Exception ignore) {}
-        }
-        if(result.isEmpty()) {
-            throw new DbManagerException(DbManagerError.UNABLE_TO_GET_PROPERTIES_FILE);
-        }
-        return result;
-    }
-
-    protected static Properties getProperties() throws DbManagerException {
-        if(properties == null || properties.isEmpty()) {
-            properties = loadPropertiesFile();
-        }
-        return properties;
     }
 
     public static void runDbManager() throws DbManagerException {
@@ -110,11 +86,11 @@ public class DbManagerUtils {
             dbManagerStatusData = dbManagerStatusDataRepository.getAll().get(0);
         }
 
-        if(!dbManagerStatusData.getSeedFilesRan() && doesDirectoryOrFileExistInResourceDirectory(getSeedFileResourceDirectory())) {
+        if(!dbManagerStatusData.getSeedFilesRan() && doesDirectoryOrFileExistInDirectory(getSeedFileResourceDirectory())) {
             try {
                 List<String> seedFileNames = new ArrayList<>();
                 try {
-                    seedFileNames = getResourceFiles(getSeedFileResourceDirectory());
+                    seedFileNames = getAllFileNamesInPath(getSeedFileResourceDirectory(), false);
                 } catch (IOException e) {
                     throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
                 }
@@ -124,10 +100,10 @@ public class DbManagerUtils {
                     seedFileNames.forEach(seedFileName -> seedNumbersOnlyAndFilenames.put(Long.parseLong(seedFileName.replaceAll("[^0-9]", "")), seedFileName));
                     List<Long> seedFilenameNumbersOnly = seedNumbersOnlyAndFilenames.keySet().stream().sorted().collect(Collectors.toList());
                     for (Long seedFilenameNumberOnly : seedFilenameNumbersOnly) {
-                        String sql = readString(getFileFromResource(seedNumbersOnlyAndFilenames.get(seedFilenameNumberOnly)).toPath());
+                        String sql = readFileIntoString(seedNumbersOnlyAndFilenames.get(seedFilenameNumberOnly));
                         dbManagerStatusDataRepository.executeQueryRaw(sql);
                     }
-                } catch (IOException | java.net.URISyntaxException e) {
+                } catch (IOException e) {
                     throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
                 }
                 dbManagerStatusData.setSeedFilesRan(true);
@@ -144,10 +120,10 @@ public class DbManagerUtils {
             }
         }
 
-        if(doesDirectoryOrFileExistInResourceDirectory(getMigrationFileResourceDirectory())) {
+        if(doesDirectoryOrFileExistInDirectory(getMigrationFileResourceDirectory())) {
             List<String> migrationFileNames = new ArrayList<>();
             try {
-                migrationFileNames = getResourceFiles(getMigrationFileResourceDirectory());
+                migrationFileNames = getAllFileNamesInPath(getMigrationFileResourceDirectory(), false);
             } catch (IOException e) {
                 throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES, e.getMessage());
             }
@@ -165,52 +141,15 @@ public class DbManagerUtils {
                             );
                 }
                 for (Long migrationFilenameNumberOnly : migrationFilenameNumbersOnly) {
-                    String sql = readString(getFileFromResource(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly)).toPath());
+                    String sql = readFileIntoString(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly));
                     dbManagerStatusDataRepository.executeQueryRaw(sql);
                     dbManagerStatusData.setFilenameOfLastMigrationFileThatWasRun(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly));
                     dbManagerStatusDataRepository.insertOrUpdate(dbManagerStatusData);
                 }
-            } catch (IOException | java.net.URISyntaxException e) {
+            } catch (IOException e) {
                 throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES, e.getMessage());
             }
         }
-    }
-
-    private static File getFileFromResource(String fileName) throws URISyntaxException {
-        ClassLoader classLoader = getContextClassLoader();
-        URL resource = classLoader.getResource(fileName);
-        if (resource == null) {
-            throw new IllegalArgumentException("file not found! " + fileName);
-        } else {
-            return new File(resource.toURI());
-        }
-    }
-
-    private static List<String> getResourceFiles(String path) throws IOException {
-        List<String> filenames = new ArrayList<>();
-        try (
-            InputStream in = getResourceAsStream(path);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-            String resource;
-            while ((resource = br.readLine()) != null) {
-                filenames.add((path.endsWith("/")) ? path + resource : path + "/" + resource);
-            }
-        }
-        return filenames;
-    }
-
-    private static InputStream getResourceAsStream(String resource) {
-        final InputStream in = getContextClassLoader().getResourceAsStream(resource);
-        return in == null ? getContextClassLoader().getResourceAsStream(resource) : in;
-    }
-
-    private static ClassLoader getContextClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
-    }
-
-    private static Boolean doesDirectoryOrFileExistInResourceDirectory(String resourceDir) {
-        final  URL resource = getContextClassLoader().getResource(resourceDir);
-        return (resource != null);
     }
 
 }
