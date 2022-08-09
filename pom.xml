@@ -37,5 +37,10 @@
 			<artifactId>Java-Reflection-Utils</artifactId>
 			<version>1.0.21</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.ricomaster9000</groupId>
+			<artifactId>ResourceUtils</artifactId>
+			<version>1.0.1</version>
+		</dependency>
 	</dependencies>
 </project>

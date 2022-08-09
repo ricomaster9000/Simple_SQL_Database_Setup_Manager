@@ -33,6 +33,8 @@ public class DbManagerError extends CustomError {
             500);
     public static final DbManagerError UNABLE_TO_PROCESS_SEED_FILES = new DbManagerError(DbManagerError.class.getName()+"_00110", "Error occurred while trying to process seed files, seed file changes have been rolled back",
             500);
+    public static final DbManagerError UNABLE_TO_GET_DATABASE_CONNECTION_DETAILS = new DbManagerError(DbManagerError.class.getName()+"_00111", "Unable to get database connection details",
+            500);
 
     DbManagerError(String errorCode, String reason, int httpStatusCode) {
         super(errorCode,reason,httpStatusCode);
