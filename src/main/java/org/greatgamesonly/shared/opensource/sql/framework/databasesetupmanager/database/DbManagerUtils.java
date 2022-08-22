@@ -4,14 +4,23 @@ import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.e
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.errors.DbManagerError;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.greatgamesonly.opensource.utils.resourceutils.ResourceUtils.*;
+import static org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.database.DbUtils.returnPreparedValueForQuery;
 
 public class DbManagerUtils {
+    static {
+        try {
+            runDbManager();
+        } catch (DbManagerException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     protected static String getDatabaseUrl() throws DbManagerException {
         String result = getProperty("datasource.url");
@@ -24,6 +33,10 @@ public class DbManagerUtils {
         if(result == null || result.isBlank()) {
             throw new DbManagerException(DbManagerError.UNABLE_TO_GET_DATABASE_CONNECTION_DETAILS);
         }
+        /*int lastIndexForwardSlash = result.lastIndexOf("/");
+        if(lastIndexForwardSlash > 0 && result.toCharArray()[lastIndexForwardSlash-1] != '/') {
+            result = result.substring(0,lastIndexForwardSlash) + "/postgres";
+        }*/
         return result;
     }
 
@@ -75,10 +88,29 @@ public class DbManagerUtils {
         DbManagerStatusDataRepository dbManagerStatusDataRepository = new DbManagerStatusDataRepository();
         DbManagerStatusData dbManagerStatusData = null;
 
-        dbManagerStatusDataRepository.executeQueryRaw("CREATE TABLE IF NOT EXISTS \"databasesetupmanager_setup_status_info\" ("+
-                "id serial PRIMARY KEY,"+
-                "seed_files_ran BOOLEAN NOT NULL DEFAULT FALSE,"+
-                "filename_last_migration_file_successfully_ran VARCHAR(10000) NOT NULL);");
+        // check if relevant database exists
+        /*String databaseUrl = getDatabaseUrl();
+        String databaseName = databaseUrl.substring(databaseUrl.lastIndexOf("/"));
+
+        try {
+            long databaseExistsCountRow;
+            ResultSet resultSetDbExists = dbManagerStatusDataRepository
+                    .executeQueryRaw("SELECT COUNT(*) FROM pg_catalog.pg_database as exists WHERE lower(" + databaseName + ") = lower('" + databaseName + "');");
+            resultSetDbExists.next();
+            databaseExistsCountRow = resultSetDbExists.getLong("exists");
+            resultSetDbExists.close();
+            if(databaseExistsCountRow <= 0) {
+                // check if db_link extension is installed
+                ResultSet resultSetDbExists = dbManagerStatusDataRepository.executeQueryRaw("SELECT COUNT(*) as exists WHERE pg_proc.pronamespace=pg_namespace.oid AND pg_proc.proname LIKE '%dblink%';");
+
+                dbManagerStatusDataRepository.executeQueryRaw("CREATE TABLE IF NOT EXISTS \"databasesetupmanager_setup_status_info\" (" +
+                        "id serial PRIMARY KEY," +
+                        "seed_files_ran BOOLEAN NOT NULL DEFAULT FALSE," +
+                        "filename_last_migration_file_successfully_ran VARCHAR(10000) NOT NULL);");
+            }
+        } catch (Exception e) {
+
+        }*/
 
         if(dbManagerStatusDataRepository.countByColumn("id", 1) <= 0) {
             dbManagerStatusData = dbManagerStatusDataRepository.insertOrUpdate(new DbManagerStatusData(1L,false, ""));
