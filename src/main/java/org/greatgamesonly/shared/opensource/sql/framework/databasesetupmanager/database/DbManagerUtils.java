@@ -4,14 +4,13 @@ import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.e
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.errors.DbManagerError;
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static org.greatgamesonly.opensource.utils.resourceutils.ResourceUtils.*;
-import static org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.database.DbUtils.returnPreparedValueForQuery;
 
 public class DbManagerUtils {
     static {
@@ -183,6 +182,7 @@ public class DbManagerUtils {
                 throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES, e.getMessage());
             }
         }
+        Logger.getLogger("Simple_SQL_Database_Setup_Manager").info("Simple_SQL_Database_Setup_Manager - END");
         System.out.println("Simple_SQL_Database_Setup_Manager - END");
     }
 
