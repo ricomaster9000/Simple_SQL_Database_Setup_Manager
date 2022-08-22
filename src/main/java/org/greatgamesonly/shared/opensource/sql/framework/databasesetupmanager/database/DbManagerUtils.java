@@ -85,6 +85,7 @@ public class DbManagerUtils {
     }
 
     public static void runDbManager() throws DbManagerException {
+        System.out.println("Simple_SQL_Database_Setup_Manager - BEGIN");
         DbManagerStatusDataRepository dbManagerStatusDataRepository = new DbManagerStatusDataRepository();
         DbManagerStatusData dbManagerStatusData = null;
 
@@ -182,6 +183,7 @@ public class DbManagerUtils {
                 throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES, e.getMessage());
             }
         }
+        System.out.println("Simple_SQL_Database_Setup_Manager - END");
     }
 
 }
