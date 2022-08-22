@@ -13,13 +13,6 @@ import java.util.stream.Collectors;
 import static org.greatgamesonly.opensource.utils.resourceutils.ResourceUtils.*;
 
 public class DbManagerUtils {
-    static {
-        try {
-            runDbManager();
-        } catch (DbManagerException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     protected static String getDatabaseUrl() throws DbManagerException {
         String result = getProperty("datasource.url");
@@ -84,7 +77,8 @@ public class DbManagerUtils {
     }
 
     public static void runDbManager() throws DbManagerException {
-        System.out.println("Simple_SQL_Database_Setup_Manager - BEGIN");
+        Logger logger = Logger.getLogger("Simple_SQL_Database_Setup_Manager");
+        logger.info("Simple_SQL_Database_Setup_Manager - BEGIN");
         DbManagerStatusDataRepository dbManagerStatusDataRepository = new DbManagerStatusDataRepository();
         DbManagerStatusData dbManagerStatusData = null;
 
@@ -183,7 +177,6 @@ public class DbManagerUtils {
             }
         }
         Logger.getLogger("Simple_SQL_Database_Setup_Manager").info("Simple_SQL_Database_Setup_Manager - END");
-        System.out.println("Simple_SQL_Database_Setup_Manager - END");
     }
 
 }
