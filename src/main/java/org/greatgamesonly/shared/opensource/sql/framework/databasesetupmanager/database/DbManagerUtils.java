@@ -145,7 +145,7 @@ public class DbManagerUtils {
                 dbManagerStatusDataRepository.executeQueryRaw(
                     String.format("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO %s;",getDatabaseUsername())
                 );
-                throw new DbManagerException(DbManagerError.UNABLE_TO_PROCESS_SEED_FILES);
+                throw new DbManagerException(DbManagerError.UNABLE_TO_PROCESS_SEED_FILES, e.getMessage());
             }
             logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed Files - DONE");
         }
