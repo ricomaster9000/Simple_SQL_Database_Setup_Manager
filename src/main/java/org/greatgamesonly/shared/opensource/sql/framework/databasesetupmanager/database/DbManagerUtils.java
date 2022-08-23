@@ -96,15 +96,15 @@ public class DbManagerUtils {
             if(databaseExistsCountRow <= 0) {
                 // check if db_link extension is installed
                 ResultSet resultSetDbExists = dbManagerStatusDataRepository.executeQueryRaw("SELECT COUNT(*) as exists WHERE pg_proc.pronamespace=pg_namespace.oid AND pg_proc.proname LIKE '%dblink%';");
-
-                dbManagerStatusDataRepository.executeQueryRaw("CREATE TABLE IF NOT EXISTS \"databasesetupmanager_setup_status_info\" (" +
-                        "id serial PRIMARY KEY," +
-                        "seed_files_ran BOOLEAN NOT NULL DEFAULT FALSE," +
-                        "filename_last_migration_file_successfully_ran VARCHAR(10000) NOT NULL);");
             }
         } catch (Exception e) {
 
         }*/
+
+        dbManagerStatusDataRepository.executeQueryRaw("CREATE TABLE IF NOT EXISTS \"databasesetupmanager_setup_status_info\" (" +
+                "id serial PRIMARY KEY," +
+                "seed_files_ran BOOLEAN NOT NULL DEFAULT FALSE," +
+                "filename_last_migration_file_successfully_ran VARCHAR(10000) NOT NULL);");
 
         if(dbManagerStatusDataRepository.countByColumn("id", 1) <= 0) {
             dbManagerStatusData = dbManagerStatusDataRepository.insertOrUpdate(new DbManagerStatusData(1L,false, ""));
