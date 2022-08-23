@@ -118,7 +118,8 @@ public class DbManagerUtils {
             try {
                 List<String> seedFileNames = new ArrayList<>();
                 try {
-                    seedFileNames = getAllFileNamesInPath(getSeedFileResourceDirectory(), false);
+                    seedFileNames = getAllFilePathsInPath(getSeedFileResourceDirectory(), false);
+                    logger.info("Simple_SQL_Database_Setup_Manager - Seed Files To Process - " + String.join(",",seedFileNames));
                 } catch (IOException e) {
                     throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
                 }
