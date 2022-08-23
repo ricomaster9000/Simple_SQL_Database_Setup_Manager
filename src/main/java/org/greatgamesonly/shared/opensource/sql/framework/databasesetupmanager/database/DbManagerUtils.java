@@ -113,6 +113,7 @@ public class DbManagerUtils {
         }
 
         if(!dbManagerStatusData.getSeedFilesRan() && doesDirectoryOrFileExistInDirectory(getSeedFileResourceDirectory())) {
+            logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed Files - START");
             try {
                 List<String> seedFileNames = new ArrayList<>();
                 try {
@@ -126,7 +127,9 @@ public class DbManagerUtils {
                     seedFileNames.forEach(seedFileName -> seedNumbersOnlyAndFilenames.put(Long.parseLong(seedFileName.replaceAll("[^0-9]", "")), seedFileName));
                     List<Long> seedFilenameNumbersOnly = seedNumbersOnlyAndFilenames.keySet().stream().sorted().collect(Collectors.toList());
                     for (Long seedFilenameNumberOnly : seedFilenameNumbersOnly) {
-                        String sql = readFileIntoString(seedNumbersOnlyAndFilenames.get(seedFilenameNumberOnly));
+                        String seedFileName = seedNumbersOnlyAndFilenames.get(seedFilenameNumberOnly);
+                        String sql = readFileIntoString(seedFileName);
+                        logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed File " + seedFileName);
                         dbManagerStatusDataRepository.executeQueryRaw(sql);
                     }
                 } catch (IOException e) {
@@ -144,6 +147,7 @@ public class DbManagerUtils {
                 );
                 throw new DbManagerException(DbManagerError.UNABLE_TO_PROCESS_SEED_FILES);
             }
+            logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed Files - DONE");
         }
 
         if(doesDirectoryOrFileExistInDirectory(getMigrationFileResourceDirectory())) {
