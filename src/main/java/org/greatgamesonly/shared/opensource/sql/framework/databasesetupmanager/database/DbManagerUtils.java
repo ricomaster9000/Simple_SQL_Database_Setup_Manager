@@ -4,6 +4,7 @@ import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.e
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.errors.DbManagerError;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -176,7 +177,7 @@ public class DbManagerUtils {
                     dbManagerStatusData.setFilenameOfLastMigrationFileThatWasRun(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly));
                     dbManagerStatusDataRepository.insertOrUpdate(dbManagerStatusData);
                 }
-            } catch (IOException e) {
+            } catch (IOException | URISyntaxException e) {
                 throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES, e.getMessage());
             }
         }
