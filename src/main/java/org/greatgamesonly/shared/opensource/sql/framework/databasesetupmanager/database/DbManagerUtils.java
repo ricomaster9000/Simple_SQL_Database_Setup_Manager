@@ -113,12 +113,12 @@ public class DbManagerUtils {
             dbManagerStatusData = dbManagerStatusDataRepository.getAll().get(0);
         }
 
-        if(!dbManagerStatusData.getSeedFilesRan() && doesDirectoryOrFileExistInDirectory(getSeedFileResourceDirectory())) {
+        if(!dbManagerStatusData.getSeedFilesRan() && doesDirectoryOrFileExist(getSeedFileResourceDirectory())) {
             logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed Files - START");
             try {
                 List<String> seedFileNames = new ArrayList<>();
                 try {
-                    seedFileNames = getAllFilePathsInPath(getSeedFileResourceDirectory(), false);
+                    seedFileNames = getAllFileNamesInPath(getSeedFileResourceDirectory(), false);
                     logger.info("Simple_SQL_Database_Setup_Manager - Seed Files To Process - " + String.join(",",seedFileNames));
                 } catch (IOException e) {
                     throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
@@ -130,7 +130,7 @@ public class DbManagerUtils {
                     List<Long> seedFilenameNumbersOnly = seedNumbersOnlyAndFilenames.keySet().stream().sorted().collect(Collectors.toList());
                     for (Long seedFilenameNumberOnly : seedFilenameNumbersOnly) {
                         String seedFileName = seedNumbersOnlyAndFilenames.get(seedFilenameNumberOnly);
-                        String sql = readFileIntoString(seedFileName);
+                        String sql = readFileIntoString(getSeedFileResourceDirectory() + "/" + seedFileName);
                         logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed File " + seedFileName);
                         dbManagerStatusDataRepository.executeQueryRaw(sql);
                     }
@@ -152,7 +152,7 @@ public class DbManagerUtils {
             logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed Files - DONE");
         }
 
-        if(doesDirectoryOrFileExistInDirectory(getMigrationFileResourceDirectory())) {
+        if(doesDirectoryOrFileExist(getMigrationFileResourceDirectory())) {
             List<String> migrationFileNames = new ArrayList<>();
             try {
                 migrationFileNames = getAllFileNamesInPath(getMigrationFileResourceDirectory(), false);
@@ -173,7 +173,7 @@ public class DbManagerUtils {
                             );
                 }
                 for (Long migrationFilenameNumberOnly : migrationFilenameNumbersOnly) {
-                    String sql = readFileIntoString(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly));
+                    String sql = readFileIntoString(getMigrationFileResourceDirectory() + "/" + migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly));
                     dbManagerStatusDataRepository.executeQueryRaw(sql);
                     dbManagerStatusData.setFilenameOfLastMigrationFileThatWasRun(migrationNumbersOnlyAndFilenames.get(migrationFilenameNumberOnly));
                     dbManagerStatusDataRepository.insertOrUpdate(dbManagerStatusData);
