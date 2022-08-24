@@ -144,9 +144,15 @@ public class DbManagerUtils {
                 String databaseName = databaseUrl[databaseUrl.length-1];
 
                 //ROLLBACK by deleting all the tables in a schema (including constraints and functions etc.
-                dbManagerStatusDataRepository.executeQueryRaw(
-                    String.format("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO %s;",getDatabaseUsername())
-                );
+                try {
+                    dbManagerStatusDataRepository.executeQueryRaw(
+                            String.format("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres; GRANT ALL ON SCHEMA public TO %s;", getDatabaseUsername())
+                    );
+                } catch (Exception exceptionInner) {
+                    dbManagerStatusDataRepository.executeQueryRaw(
+                            String.format("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO %s;",getDatabaseUsername())
+                    );
+                }
                 throw new DbManagerException(DbManagerError.UNABLE_TO_PROCESS_SEED_FILES, e.getMessage());
             }
             logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed Files - DONE");
