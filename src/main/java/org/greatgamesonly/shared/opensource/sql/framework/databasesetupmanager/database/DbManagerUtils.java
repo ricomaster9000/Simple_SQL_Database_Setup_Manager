@@ -115,27 +115,24 @@ public class DbManagerUtils {
 
         if(!dbManagerStatusData.getSeedFilesRan() && doesDirectoryOrFileExist(getSeedFileResourceDirectory())) {
             logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed Files - START");
-            try {
-                List<String> seedFileNames = new ArrayList<>();
-                try {
-                    seedFileNames = getAllFileNamesInPath(getSeedFileResourceDirectory(), false);
-                    logger.info("Simple_SQL_Database_Setup_Manager - Seed Files To Process - " + String.join(",",seedFileNames));
-                } catch (IOException e) {
-                    throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
-                }
 
-                try {
-                    HashMap<Long, String> seedNumbersOnlyAndFilenames = new HashMap<>();
-                    seedFileNames.forEach(seedFileName -> seedNumbersOnlyAndFilenames.put(Long.parseLong(seedFileName.replaceAll("[^0-9]", "")), seedFileName));
-                    List<Long> seedFilenameNumbersOnly = seedNumbersOnlyAndFilenames.keySet().stream().sorted().collect(Collectors.toList());
-                    for (Long seedFilenameNumberOnly : seedFilenameNumbersOnly) {
-                        String seedFileName = seedNumbersOnlyAndFilenames.get(seedFilenameNumberOnly);
-                        String sql = readFileIntoString(getSeedFileResourceDirectory() + "/" + seedFileName);
-                        logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed File " + seedFileName);
-                        dbManagerStatusDataRepository.executeQueryRaw(sql);
-                    }
-                } catch (IOException e) {
-                    throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILES, e.getMessage());
+            List<String> seedFileNames = new ArrayList<>();
+            try {
+                seedFileNames = getAllFileNamesInPath(getSeedFileResourceDirectory(), false);
+                logger.info("Simple_SQL_Database_Setup_Manager - Seed Files To Process - " + String.join(",",seedFileNames));
+            } catch (IOException e) {
+                throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILE_NAMES_TO_PROCESS, e.getMessage());
+            }
+
+            try {
+                HashMap<Long, String> seedNumbersOnlyAndFilenames = new HashMap<>();
+                seedFileNames.forEach(seedFileName -> seedNumbersOnlyAndFilenames.put(Long.parseLong(seedFileName.replaceAll("[^0-9]", "")), seedFileName));
+                List<Long> seedFilenameNumbersOnly = seedNumbersOnlyAndFilenames.keySet().stream().sorted().collect(Collectors.toList());
+                for (Long seedFilenameNumberOnly : seedFilenameNumbersOnly) {
+                    String seedFileName = seedNumbersOnlyAndFilenames.get(seedFilenameNumberOnly);
+                    String sql = readFileIntoString(getSeedFileResourceDirectory() + "/" + seedFileName);
+                    logger.info("Simple_SQL_Database_Setup_Manager - Processing Seed File " + seedFileName);
+                    dbManagerStatusDataRepository.executeQueryRaw(sql);
                 }
                 dbManagerStatusData.setSeedFilesRan(true);
                 dbManagerStatusDataRepository.insertOrUpdate(dbManagerStatusData);
