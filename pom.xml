@@ -40,7 +40,7 @@
 		<dependency>
 			<groupId>com.github.ricomaster9000</groupId>
 			<artifactId>ResourceUtils</artifactId>
-			<version>main-17b288280a-1</version>
+			<version>main-97dd119bb6-1</version>
 		</dependency>
 	</dependencies>
 </project>
