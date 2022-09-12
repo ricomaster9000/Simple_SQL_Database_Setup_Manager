@@ -120,7 +120,7 @@ public class DbManagerUtils {
             try {
                 seedFileNames = getAllFileNamesInPath(getSeedFileResourceDirectory(), false);
                 logger.info("Simple_SQL_Database_Setup_Manager - Seed Files To Process - " + String.join(",",seedFileNames));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_SEED_FILE_NAMES_TO_PROCESS, e.getMessage());
             }
 
@@ -159,7 +159,7 @@ public class DbManagerUtils {
             List<String> migrationFileNames = new ArrayList<>();
             try {
                 migrationFileNames = getAllFileNamesInPath(getMigrationFileResourceDirectory(), false);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new DbManagerException(DbManagerError.UNABLE_TO_FETCH_MIGRATION_FILES, e.getMessage());
             }
 
