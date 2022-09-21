@@ -1,7 +1,7 @@
 package org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.database;
 
 
-import org.greatgamesonly.reflection.utils.ReflectionUtils;
+import org.greatgamesonly.opensource.utils.reflectionutils.ReflectionUtils;
 
 import java.beans.IntrospectionException;
 import java.lang.reflect.Field;

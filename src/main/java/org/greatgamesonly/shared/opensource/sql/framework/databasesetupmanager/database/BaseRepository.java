@@ -2,7 +2,7 @@ package org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.
 
 import org.apache.commons.dbutils.DbUtils;
 import org.apache.commons.dbutils.QueryRunner;
-import org.greatgamesonly.reflection.utils.ReflectionUtils;
+import org.greatgamesonly.opensource.utils.reflectionutils.ReflectionUtils;
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.DbManagerException;
 import org.greatgamesonly.shared.opensource.sql.framework.databasesetupmanager.exceptions.errors.DbManagerError;
 
