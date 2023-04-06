@@ -18,6 +18,6 @@ THERE IS NO rollback functionality that exists if migration operations fail, so 
 
 THERE IS rollback functionality that exists if seed files fail to process, but take note that this rollback logic is quite basic and will remove all the tables and functions and constraints etc. in the public schema for the database name used in the datasource.url property value.
 
-add as dependency by using jitpack.io, go to this link: https://jitpack.io/#ricomaster9000/Simple_SQL_Database_Setup_Manager/1.1.5.1
+add as dependency by using jitpack.io, go to this link: https://jitpack.io/#ricomaster9000/Simple_SQL_Database_Setup_Manager/1.1.6
 
 Will upload to Maven later, once I am fully done and have more time
