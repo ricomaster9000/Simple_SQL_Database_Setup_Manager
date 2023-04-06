@@ -26,10 +26,7 @@ public class DbManagerUtils {
         if(result == null || result.isBlank()) {
             throw new DbManagerException(DbManagerError.UNABLE_TO_GET_DATABASE_CONNECTION_DETAILS);
         }
-        /*int lastIndexForwardSlash = result.lastIndexOf("/");
-        if(lastIndexForwardSlash > 0 && result.toCharArray()[lastIndexForwardSlash-1] != '/') {
-            result = result.substring(0,lastIndexForwardSlash) + "/postgres";
-        }*/
+
         return result;
     }
 
